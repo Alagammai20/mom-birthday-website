@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Happy Birthday VINATHA 💖</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', cursive;
+            text-align: center;
+            background: linear-gradient(135deg, #ffdde1, #ee9ca7);
+            overflow-x: hidden;
+        }
+
+        h1 {
+            margin-top: 80px;
+            font-size: 50px;
+            color: white;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        p {
+            font-size: 22px;
+            color: white;
+            margin-top: 20px;
+        }
+
+        .btn {
+            margin-top: 40px;
+            padding: 15px 35px;
+            font-size: 20px;
+            border: none;
+            border-radius: 30px;
+            background: white;
+            color: #ee9ca7;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background: #ffe6f0;
+            transform: scale(1.1);
+        }
+
+        .hearts {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .heart {
+            position: absolute;
+            color: white;
+            animation: float 6s linear infinite;
+            font-size: 20px;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh); opacity: 1; }
+            100% { transform: translateY(-10vh); opacity: 0; }
+        }
+
+        @keyframes fadeIn {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+
+        .photo-section {
+            margin-top: 60px;
+        }
+
+        img {
+            width: 250px;
+            border-radius: 20px;
+            margin: 10px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="hearts" id="hearts"></div>
+
+    <h1>Happy Birthday VINATHA 💕</h1>
+    <p>You are the most special person in our lives 🌸</p>
+    <p>Your love, strength and kindness mean everything to us 💖</p>
+
+    <a href="/login">
+        <button class="btn">Enter Your Surprise 🎁</button>
+    </a>
+
+    <div class="photo-section">
+        <!-- Replace these with real images later -->
+        <img src="https://via.placeholder.com/250" alt="Mom Photo">
+        <img src="https://via.placeholder.com/250" alt="Family Photo">
+        <img src="https://via.placeholder.com/250" alt="Memory">
+    </div>
+
+    <script>
+        function createHeart() {
+            const heart = document.createElement("div");
+            heart.classList.add("heart");
+            heart.innerHTML = "💖";
+            heart.style.left = Math.random() * 100 + "vw";
+            heart.style.fontSize = Math.random() * 20 + 15 + "px";
+            heart.style.animationDuration = Math.random() * 3 + 3 + "s";
+            document.getElementById("hearts").appendChild(heart);
+
+            setTimeout(() => {
+                heart.remove();
+            }, 6000);
+        }
+
+        setInterval(createHeart, 300);
+    </script>
+
+</body>
+</html>
