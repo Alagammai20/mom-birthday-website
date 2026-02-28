@@ -1,75 +1,140 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Write a Letter 💌</title>
+    <title>Send Your Love 💌</title>
     <style>
         body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #ffdde1, #ee9ca7);
             margin: 0;
-            font-family: 'Segoe UI', cursive;
-            background: linear-gradient(135deg, #ffe6f0, #ffb6c1);
-            text-align: center;
-            padding: 40px;
+            padding: 0;
         }
 
-        .box {
+        .container {
+            width: 60%;
+            margin: 60px auto;
             background: white;
-            padding: 30px;
-            border-radius: 25px;
-            max-width: 600px;
-            margin: auto;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-        }
-
-        textarea {
-            width: 90%;
-            height: 150px;
-            border-radius: 15px;
-            padding: 10px;
-            border: 1px solid #ccc;
-        }
-
-        input[type="file"] {
-            margin-top: 15px;
-        }
-
-        button {
-            margin-top: 20px;
-            padding: 10px 25px;
+            padding: 40px;
             border-radius: 20px;
-            border: none;
-            background: #ee9ca7;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #ff9eb5;
+            box-shadow: 0px 10px 30px rgba(0,0,0,0.2);
         }
 
         h2 {
-            color: #d63384;
+            text-align: center;
+            color: #ff4d6d;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+            resize: none;
+        }
+
+        input[type="file"] {
+            margin-top: 10px;
+        }
+
+        button {
+            background: #ff6f91;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #ff3e6c;
+        }
+
+        .danger {
+            background: #ff4d4d;
+        }
+
+        .danger:hover {
+            background: #cc0000;
+        }
+
+        .link-btn {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: white;
+            background: #6a5acd;
+            padding: 8px 15px;
+            border-radius: 10px;
+        }
+
+        .link-btn:hover {
+            background: #483d8b;
+        }
+
+        .existing-box {
+            margin-top: 30px;
+            background: #fff0f5;
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .top-buttons {
+            text-align: right;
         }
     </style>
 </head>
+
 <body>
 
-<div class="box">
-    <h2>Write or Upload Your Letter for VINATHA 💖</h2>
+<div class="container">
+
+    <div class="top-buttons">
+        <a href="/logout" class="link-btn">Logout 🚪</a>
+    </div>
+
+    <h2>Hello {{ session.username }} 💖</h2>
 
     <form method="POST" enctype="multipart/form-data">
+        <label><b>Write your heartfelt message:</b></label><br><br>
 
-        <p>💌 Write your letter below:</p>
-        <textarea name="letter_text" placeholder="Write your beautiful wishes here..."></textarea>
+        <textarea name="message" rows="6" placeholder="Type your beautiful birthday wish here...">{{ entry[2] if entry else '' }}</textarea>
 
-        <p>OR</p>
+        <br><br>
 
-        <p>📎 Upload a letter:</p>
+        <label><b>Upload a photo or video (optional):</b></label><br>
         <input type="file" name="file">
 
-        <br>
-        <button type="submit">Submit with Love ❤️</button>
+        <br><br>
+
+        <button type="submit">Save / Update 💕</button>
     </form>
+
+    {% if entry %}
+    <div class="existing-box">
+        <h3>Your Current Submission 💌</h3>
+        <p>{{ entry[2] }}</p>
+
+        {% if entry[3] %}
+            <p>
+                📎 Attachment:
+                <a href="{{ url_for('uploaded_file', filename=entry[3]) }}" target="_blank">
+                    View File
+                </a>
+            </p>
+        {% endif %}
+
+        <form method="POST" action="/delete">
+            <button type="submit" class="danger">Delete Submission ❌</button>
+        </form>
+    </div>
+    {% endif %}
+
+    <br>
+    <a href="/" class="link-btn">Go to Homepage 🏠</a>
+
 </div>
 
 </body>
