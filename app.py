@@ -127,21 +127,32 @@ def admin():
     conn = get_db()
     cur = conn.cursor()
 
-    cur.execute("SELECT username FROM entries")
-    entries = cur.fetchall()
+    # Fetch full data including id
+    cur.execute("SELECT id, username, message FROM entries")
+    rows = cur.fetchall()
+
+    # Convert tuples to dictionaries
+    entries = []
+    for row in rows:
+        entries.append({
+            "id": row[0],
+            "username": row[1],
+            "message": row[2]
+        })
 
     selected = None
 
     if request.method == "POST":
-        u = request.form["username"]
-        cur.execute("SELECT * FROM entries WHERE username=%s", (u,))
-        selected = cur.fetchone()
+        entry_id = request.form["id"]
+        for entry in entries:
+            if str(entry["id"]) == entry_id:
+                selected = entry
+                break
 
     cur.close()
     conn.close()
 
     return render_template("admin.html", entries=entries, selected=selected)
-
 @app.route("/logout")
 def logout():
     session.clear()
