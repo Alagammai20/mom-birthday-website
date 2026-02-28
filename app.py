@@ -2,6 +2,9 @@ from flask import Flask, render_template, request, redirect, session, send_from_
 import os
 import sqlite3
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "database.db")
+
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
@@ -13,7 +16,7 @@ if not os.path.exists(UPLOAD_FOLDER):
 # DATABASE SETUP
 # ===============================
 def init_db():
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('''
         CREATE TABLE IF NOT EXISTS entries (
@@ -82,7 +85,7 @@ def submit():
     if session["username"] == "vinatha":
         return redirect("/admin")
 
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
     if request.method == "POST":
@@ -126,7 +129,7 @@ def delete():
     if "username" not in session:
         return redirect("/login")
 
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("DELETE FROM entries WHERE username=?", (session["username"],))
     conn.commit()
@@ -142,7 +145,7 @@ def admin():
     if "username" not in session or session["username"] != "vinatha":
         return redirect("/login")
 
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
     c.execute("SELECT id, username FROM entries")
