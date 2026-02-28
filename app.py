@@ -1,39 +1,25 @@
-from flask import Flask, render_template, request, redirect, session, send_from_directory
+from flask import Flask, render_template, request, redirect, session
 import os
-import sqlite3
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "database.db")
+import psycopg2
+from urllib.parse import urlparse
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
-UPLOAD_FOLDER = "uploads"
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
-# ===============================
-# DATABASE SETUP
-# ===============================
-def init_db():
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS entries (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE,
-            message TEXT,
-            filename TEXT
-        )
-    ''')
-    conn.commit()
-    conn.close()
+def get_db():
+    url = urlparse(DATABASE_URL)
+    conn = psycopg2.connect(
+        database=url.path[1:],
+        user=url.username,
+        password=url.password,
+        host=url.hostname,
+        port=url.port
+    )
+    return conn
 
-init_db()
-
-# ===============================
-# USERS
-# ===============================
+# ================= USERS =================
 users = {
     "smiruthi": "smile1",
     "ajay": "ajay123",
@@ -43,40 +29,49 @@ users = {
     "Bharathan": "bharat8",
     "Parthasarathy": "partha4",
     "Kannammal": "kanna6",
-    "vinatha": "queenmom"   # ADMIN 👑
+    "vinatha": "queenmom"
 }
 
-# ===============================
-# HOME
-# ===============================
+# ================= INIT TABLE =================
+def init_db():
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS entries (
+            id SERIAL PRIMARY KEY,
+            username TEXT UNIQUE,
+            message TEXT,
+            filename TEXT
+        )
+    """)
+    conn.commit()
+    cur.close()
+    conn.close()
+
+init_db()
+
+# ================= HOME =================
 @app.route("/")
 def home():
     return render_template("home.html")
 
-# ===============================
-# LOGIN
-# ===============================
+# ================= LOGIN =================
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
+        u = request.form["username"]
+        p = request.form["password"]
 
-        if username in users and users[username] == password:
-            session["username"] = username
-
-            if username == "vinatha":
+        if u in users and users[u] == p:
+            session["username"] = u
+            if u == "vinatha":
                 return redirect("/admin")
-            else:
-                return redirect("/submit")
-        else:
-            return "Invalid Login"
+            return redirect("/submit")
+        return "Invalid Login"
 
     return render_template("login.html")
 
-# ===============================
-# SUBMIT / EDIT
-# ===============================
+# ================= SUBMIT =================
 @app.route("/submit", methods=["GET", "POST"])
 def submit():
     if "username" not in session:
@@ -85,100 +80,72 @@ def submit():
     if session["username"] == "vinatha":
         return redirect("/admin")
 
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
+    conn = get_db()
+    cur = conn.cursor()
 
     if request.method == "POST":
-        message = request.form["message"]
-        file = request.files["file"]
-        filename = None
+        msg = request.form["message"]
 
-        if file and file.filename != "":
-            filename = file.filename
-            file.save(os.path.join(UPLOAD_FOLDER, filename))
-
-        # Check if user already submitted
-        c.execute("SELECT * FROM entries WHERE username=?", (session["username"],))
-        existing = c.fetchone()
-
-        if existing:
-            c.execute(
-                "UPDATE entries SET message=?, filename=? WHERE username=?",
-                (message, filename, session["username"])
-            )
-        else:
-            c.execute(
-                "INSERT INTO entries (username, message, filename) VALUES (?, ?, ?)",
-                (session["username"], message, filename)
-            )
+        cur.execute("""
+            INSERT INTO entries (username, message)
+            VALUES (%s, %s)
+            ON CONFLICT (username)
+            DO UPDATE SET message = EXCLUDED.message
+        """, (session["username"], msg))
 
         conn.commit()
 
-    # Fetch current user's entry
-    c.execute("SELECT * FROM entries WHERE username=?", (session["username"],))
-    entry = c.fetchone()
+    cur.execute("SELECT * FROM entries WHERE username=%s", (session["username"],))
+    entry = cur.fetchone()
+
+    cur.close()
     conn.close()
 
     return render_template("submit.html", entry=entry)
 
-# ===============================
-# DELETE
-# ===============================
+# ================= DELETE =================
 @app.route("/delete", methods=["POST"])
 def delete():
     if "username" not in session:
         return redirect("/login")
 
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute("DELETE FROM entries WHERE username=?", (session["username"],))
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM entries WHERE username=%s", (session["username"],))
     conn.commit()
+    cur.close()
     conn.close()
 
     return redirect("/submit")
 
-# ===============================
-# ADMIN DASHBOARD
-# ===============================
+# ================= ADMIN =================
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
     if "username" not in session or session["username"] != "vinatha":
         return redirect("/login")
 
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
+    conn = get_db()
+    cur = conn.cursor()
 
-    c.execute("SELECT id, username FROM entries")
-    entries = c.fetchall()
+    cur.execute("SELECT username FROM entries")
+    entries = cur.fetchall()
 
     selected = None
 
     if request.method == "POST":
-        entry_id = request.form["id"]
-        c.execute("SELECT * FROM entries WHERE id=?", (entry_id,))
-        selected = c.fetchone()
+        u = request.form["username"]
+        cur.execute("SELECT * FROM entries WHERE username=%s", (u,))
+        selected = cur.fetchone()
 
+    cur.close()
     conn.close()
 
     return render_template("admin.html", entries=entries, selected=selected)
 
-# ===============================
-# SERVE UPLOADED FILES
-# ===============================
-@app.route("/uploads/<filename>")
-def uploaded_file(filename):
-    return send_from_directory(UPLOAD_FOLDER, filename)
-
-# ===============================
-# LOGOUT
-# ===============================
 @app.route("/logout")
 def logout():
-    session.pop("username", None)
+    session.clear()
     return redirect("/")
 
-# ===============================
-# RUN
-# ===============================
 if __name__ == "__main__":
     app.run(debug=True)
