@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Write a Letter 💌</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', cursive;
+            background: linear-gradient(135deg, #ffe6f0, #ffb6c1);
+            text-align: center;
+            padding: 40px;
+        }
+
+        .box {
+            background: white;
+            padding: 30px;
+            border-radius: 25px;
+            max-width: 600px;
+            margin: auto;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        textarea {
+            width: 90%;
+            height: 150px;
+            border-radius: 15px;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        input[type="file"] {
+            margin-top: 15px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 25px;
+            border-radius: 20px;
+            border: none;
+            background: #ee9ca7;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #ff9eb5;
+        }
+
+        h2 {
+            color: #d63384;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Write or Upload Your Letter for VINATHA 💖</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+
+        <p>💌 Write your letter below:</p>
+        <textarea name="letter_text" placeholder="Write your beautiful wishes here..."></textarea>
+
+        <p>OR</p>
+
+        <p>📎 Upload a letter:</p>
+        <input type="file" name="file">
+
+        <br>
+        <button type="submit">Submit with Love ❤️</button>
+    </form>
+</div>
+
+</body>
+</html>

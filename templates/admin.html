@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VINATHA's Special Letters 💖</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', cursive;
+            background: linear-gradient(135deg, #fff0f5, #ffd1dc);
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #d63384;
+        }
+
+        .letter {
+            background: white;
+            padding: 25px;
+            margin: 20px auto;
+            border-radius: 20px;
+            max-width: 700px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        h3 {
+            color: #ee9ca7;
+        }
+
+        a {
+            color: #d63384;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<h1>All Birthday Letters for VINATHA 💕</h1>
+
+{% for row in data %}
+<div class="letter">
+    <h3>From: {{ row[0] }}</h3>
+
+    {% if row[1] %}
+        <p>{{ row[1] }}</p>
+    {% endif %}
+
+    {% if row[2] %}
+        <p><a href="/{{ row[2] }}" target="_blank">Download Attachment 📎</a></p>
+    {% endif %}
+</div>
+{% endfor %}
+
+</body>
+</html>
